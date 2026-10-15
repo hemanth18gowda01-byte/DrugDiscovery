@@ -144,21 +144,23 @@ def parse_genotypes(value: str, biosample: str) -> List[str]:
         entry = entry.strip()
         if not entry:
             continue
-        if "=" not in entry:
-            raise ValueError(
-                "Malformed AMR genotype {!r} for BioSample {}.".format(
-                    entry, biosample
-                )
-            )
-        gene, state = (part.strip() for part in entry.rsplit("=", 1))
-        if not gene or not state:
+        # NCBI exports can contain either a gene plus a call state
+        # (for example ``gyrA_D87Y=POINT``) or a gene-only call such as
+        # ``blaCTX-M-15``. A gene-only call remains useful to the model and
+        # should not reject an otherwise valid uploaded isolate.
+        if "=" in entry:
+            gene, state = (part.strip() for part in entry.rsplit("=", 1))
+        else:
+            gene, state = entry, ""
+        if not gene or ("=" in entry and not state):
             raise ValueError(
                 "Malformed AMR genotype {!r} for BioSample {}.".format(
                     entry, biosample
                 )
             )
         features.add("gene::{}".format(gene))
-        features.add("call::{}::{}".format(gene, state))
+        if state:
+            features.add("call::{}::{}".format(gene, state))
     return sorted(features)
 
 

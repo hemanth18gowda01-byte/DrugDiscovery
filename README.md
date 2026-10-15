@@ -149,8 +149,10 @@ server. The animated DNA helix uses Three.js from jsDelivr, so the visualization
 needs an internet connection.
 
 The file must include `#Organism group` and `AMR genotypes` columns. Predictions
-use these genotype calls plus the selected antibiotic. Raw FASTA files are not
-analyzed by this interface. Check API connectivity at
+use these genotype calls plus the selected antibiotic. Genotype entries may use
+the NCBI `gene=call` form (for example `gyrA_D87Y=POINT`) or a gene-only call
+(for example `blaCTX-M-15`). Raw FASTA files are not analyzed by this interface.
+Check API connectivity at
 `http://127.0.0.1:8000/api/health` and available model options at
 `http://127.0.0.1:8000/api/options`.
 
