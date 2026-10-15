@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "rewrites": [
+    { "source": "/", "destination": "/frontend/index.html" },
+    { "source": "/styles.css", "destination": "/frontend/styles.css" },
+    { "source": "/react-app.js", "destination": "/frontend/react-app.js" },
+    { "source": "/dna.js", "destination": "/frontend/dna.js" }
+  ],
+  "functions": {
+    "api/**/*.py": {
+      "excludeFiles": "{.venv/**,data/**,lib/**,frontend/**,**/__pycache__/**}"
+    }
+  }
+}

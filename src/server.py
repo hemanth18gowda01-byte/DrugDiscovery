@@ -11,7 +11,10 @@ from urllib.parse import urlparse
 import joblib
 from scipy.sparse import csr_matrix
 
-from train_surveillance import parse_genotypes
+try:
+    from .train_surveillance import parse_genotypes
+except ImportError:  # Supports direct execution: python src/server.py
+    from train_surveillance import parse_genotypes
 
 ROOT = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = ROOT / "frontend"

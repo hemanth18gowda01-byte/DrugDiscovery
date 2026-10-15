@@ -121,6 +121,17 @@ reliability.
 
 ## Interactive 3D web app
 
+### Vercel deployment
+
+This repository is Vercel-ready. Import it in Vercel, keep the repository root
+as the project root, and deploy. Vercel serves the React/Three.js frontend and
+creates Python serverless functions at `/api/health`, `/api/options`, and
+`/api/predict`. The deployment installs the packages in `requirements.txt` and
+uses Python 3.14 as specified in `.python-version`.
+
+The saved model is included in the repository. Do not add the local source CSV
+exports to the deployment; they are intentionally excluded.
+
 Start the local API and frontend with the project's Python environment:
 
 ```powershell
