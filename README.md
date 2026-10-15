@@ -29,6 +29,7 @@ models/
 src/
   extract_features.py               # FASTA validation, RGI, feature matrix
   train.py                          # AST join, training, grouped evaluation
+  train_surveillance.py             # NCBI genotypes + NLM AST training route
 requirements.txt
 ```
 
@@ -83,6 +84,71 @@ python src/extract_features.py `
   --rgi-output-dir data/rgi_results
 ```
 
+If you have the NCBI `isolates.csv` metadata file and the NLM AST export instead
+of FASTA files, those provide a separate route using the already reported AMR
+genotypes. Put the files in `data/` or pass their paths explicitly:
+
+```powershell
+python src/train_surveillance.py `
+  --isolates data/isolates.csv `
+  --ast data/NLM.csv `
+  --output models/nlm_resistance_model.joblib
+```
+
+This route joins on BioSample, uses organism/antibiotic and the NCBI
+`AMR genotypes` field as features, and uses only the `Resistance phenotype`
+column for the target. It does not rerun RGI on assemblies. Unsupported AST
+categories are excluded; conflicting R/S results for the same
+BioSample-antibiotic pair and missing/conflicting genotype records are excluded.
+## Try a prediction
+
+Use the NCBI organism group, antibiotic name, and genotype call format from
+`isolates.csv`:
+
+```powershell
+python src/predict_surveillance.py `
+  --organism "Salmonella enterica" `
+  --antibiotic ciprofloxacin `
+  --genotypes "gyrA_D87Y=POINT,parC_S80I=POINT"
+```
+
+For an isolate with no reported AMR calls, omit `--genotypes`. The output gives
+the predicted `R`/`S` label and model probabilities. This classifier was trained
+on the NCBI `AMR genotypes` field, so supply genotype strings in the same
+`gene=call` format. Unknown organisms, antibiotics, or gene calls are allowed,
+but are not learned categories for this saved model and can reduce prediction
+reliability.
+
+## Interactive 3D web app
+
+Start the local API and frontend with the project's Python environment:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python src/server.py
+```
+
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000). The interface checks the
+API/model health, loads the trained antibiotic options, and displays prediction
+warnings. Choose an antibiotic, then either enter one organism and optional AMR
+genotype calls in the **Manual isolate input** form or upload an NCBI
+`isolates.csv` export and select **Analyze isolates**. The browser streams the
+CSV and predicts up to 5,000 isolates per run; the file is not saved by the
+server. The animated DNA helix uses Three.js from jsDelivr, so the visualization
+needs an internet connection.
+
+The file must include `#Organism group` and `AMR genotypes` columns. Predictions
+use these genotype calls plus the selected antibiotic. Raw FASTA files are not
+analyzed by this interface. Check API connectivity at
+`http://127.0.0.1:8000/api/health` and available model options at
+`http://127.0.0.1:8000/api/options`.
+
+Evaluation holds out complete SNP clusters, falling back to BioSample when the
+cluster is unavailable, to reduce leakage between related isolates. The saved
+bundle includes the fitted sparse feature encoder and logistic-regression
+model. The script reports metrics on the held-out clusters, then fits the saved
+deployment model on all eligible joined rows.
+
 Join features to AST labels, train, and evaluate:
 
 ```powershell
@@ -106,6 +172,3 @@ split details, and scikit-learn version.
 
 Review CARD's current terms and licensing requirements before using RGI or CARD
 data, especially for commercial use.
-
-
-

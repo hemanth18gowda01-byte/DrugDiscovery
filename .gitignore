@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local datasets and generated RGI dependency files are not source code.
+data/*.csv
+data/rgi_results/
+lib/
+
+# Keep the deployed demo model, but ignore any future large model artifacts.
+models/*.joblib
+!models/nlm_resistance_model.joblib
